@@ -14,20 +14,20 @@
     "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "next": "^14.1.0",
+    "@prisma/client": "^5.9.1",
+    "framer-motion": "^11.0.3",
+    "next": "^16.1.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "framer-motion": "^11.0.3",
-    "zustand": "^4.5.0",
-    "@prisma/client": "^5.9.1"
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
-    "prisma": "^5.9.1",
-    "tailwindcss": "^3.4.1",
-    "postcss": "^8.4.33",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.56.0",
-    "eslint-config-next": "^14.1.0"
+    "eslint-config-next": "^16.1.6",
+    "postcss": "^8.4.33",
+    "prisma": "^5.9.1",
+    "tailwindcss": "^3.4.1"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
