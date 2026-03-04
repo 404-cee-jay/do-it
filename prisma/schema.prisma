@@ -1,0 +1,70 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - handles authentication and task ownership
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tasks Task[]
+
+  @@index([email])
+}
+
+// Task model - central entity with entropy-critical fields
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  priority    Priority @default(MEDIUM)
+  status      Status   @default(ACTIVE)
+  column      String   @default("TODO") // For Kanban columns: TODO, DOING, DONE
+  dueDate     DateTime?
+
+  // ENTROPY FIELDS (Critical)
+  // Updated on: edit, priority change, status toggle, manual bump, resurrect
+  // NOT updated on: passive viewing/scrolling
+  lastInteractedAt DateTime @default(now())
+
+  // METADATA
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  // RELATIONSHIPS
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Composite index for main query: fetch active tasks by user, sorted by interaction
+  @@index([userId, status, lastInteractedAt])
+  // Secondary index for stale task detection (auto-archiving)
+  @@index([lastInteractedAt])
+}
+
+// Priority enum with semantic values
+// Numeric mapping for calculations: LOW=1, MEDIUM=2, HIGH=3
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// Status enum for task lifecycle
+enum Status {
+  ACTIVE    // Visible in main board, included in entropy calculations
+  COMPLETED // Moved to "Recently Completed" view, auto-archived after 7 days
+  ARCHIVED  // In Graveyard, excluded from all views except resurrect
+}
